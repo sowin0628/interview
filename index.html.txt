@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公考面试对练本</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #746097;
+            --primary-light: #AD86AE;
+            --bg-pink: #ECD9ED;
+            --bg-beige: #EADACB;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --white: #FFFFFF;
+            --shadow: 0 4px 20px rgba(116, 96, 151, 0.15);
+            --radius: 20px;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(180deg, var(--bg-pink) 0%, var(--bg-beige) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            padding-bottom: 80px;
+        }
+
+        /* 页面容器 */
+        .page {
+            display: none;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+
+        .header-title {
+            font-size: 1.8em;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-subtitle {
+            color: var(--text-light);
+            font-size: 0.95em;
+        }
+
+        /* 卡片基础 */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            border: none;
+        }
+
+        .card-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 首页大数字 */
+        .stats-scroll {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+
+        .stats-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .stat-card-large {
+            min-width: 160px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .stat-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 10px 0;
+        }
+
+        /* 快捷按钮 */
+        .btn-primary {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(116, 96, 151, 0.3);
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            background: var(--bg-pink);
+            color: var(--primary);
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-small:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-light);
+            border: none;
+            background: none;
+            font-size: 0.75em;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.8em;
+            transition: transform 0.3s;
+        }
+
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+        }
+
+        /* 对练页面 */
+        .progress-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .progress-dot {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-pink);
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: var(--primary);
+        }
+
+        .question-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .q-badge {
+            background: var(--bg-pink);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .select-field, .text-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--bg-pink);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: inherit;
+            background: var(--white);
+            transition: all 0.3s;
+        }
+
+        .select-field:focus, .text-field:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .type-option {
+            padding: 12px;
+            border: 2px solid var(--bg-pink);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85em;
+        }
+
+        .type-option:hover, .type-option.selected {
+            border-color: var(--primary);
+            background: var(--bg-pink);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .rating-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--bg-pink);
+        }
+
+        .rating-row:last-child {
+            border-bottom: none;
+        }
+
+        .rating-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 5px;
+        }
+
+        .star {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--bg-pink);
+            transition: all 0.2s;
+        }
+
+        .star.active {
+            color: #F6E05E;
+            text-shadow: 0 2px 4px rgba(246, 224, 94, 0.4);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn-half {
+            flex: 1;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-prev {
+            background: var(--bg-beige);
+            color: var(--text-dark);
+            border: none;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow);
+        }
+
+        /* 金句本 */
+        .quote-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .quote-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .quote-theme {
+            background: var(--bg-pink);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .quote-date {
+            color: var(--text-light);
+            font-size: 0.8em;
+        }
+
+        .quote-content {
+            color: var(--text-dark);
+            line-height: 1.6;
+            font-size: 1.05em;
+        }
+
+        .quote-type {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        .add-quote-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 2em;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            z-index: 50;
+        }
+
+        .add-quote-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* 错题本 */
+        .todo-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .todo-card:hover {
+            transform: translateX(5px);
+        }
+
+        .todo-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary-light);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .todo-checkbox.checked {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .todo-content {
+            flex: 1;
+        }
+
+        .todo-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .todo-meta {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        .todo-card.completed .todo-title {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+
+        /* 历史页面 */
+        .tool-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tool-btn {
+            flex: 1;
+            padding: 15px;
+            background: var(--white);
+            border: 2px solid var(--bg-pink);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tool-btn:hover {
+            border-color: var(--primary);
+            background: var(--bg-pink);
+        }
+
+        .tool-icon {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .tool-label {
+            font-size: 0.85em;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .history-item {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-date {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .history-score {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .history-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hq-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--bg-pink);
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .hq-type {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hq-score {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* 计时器弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 4em;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 30px 0;
+            font-family: monospace;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .timer-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .timer-start {
+            background: var(--primary);
+            color: white;
+        }
+
+        .timer-pause {
+            background: var(--bg-beige);
+            color: var(--text-dark);
+        }
+
+        .timer-reset {
+            background: #FC8181;
+            color: white;
+        }
+
+        /* 抽题器 */
+        .draw-result {
+            background: var(--bg-pink);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .draw-type {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .draw-theme {
+            color: var(--text-dark);
+            font-size: 1.1em;
+        }
+
+        /* 图标映射 */
+        .icon-zonghe::before { content: "💡"; }
+        .icon-zuzhi::before { content: "📋"; }
+        .icon-yingji::before { content: "🔥"; }
+        .icon-renji::before { content: "🤝"; }
+        .icon-ziwo::before { content: "👤"; }
+        .icon-qingjing::before { content: "🎭"; }
+        .icon-paixu::before { content: "📊"; }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .type-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 首页 -->
+    <div class="page active" id="page-home">
+        <div class="header">
+            <div class="header-title">公考面试对练本</div>
+            <div class="header-subtitle">结构化面试 · 逐题拆解 · 错题复盘</div>
+        </div>
+
+        <div class="stats-scroll">
+            <div class="stat-card-large">
+                <div class="stat-icon">🔥</div>
+                <span class="stat-number" id="streakNum">0</span>
+                <div class="stat-label">连续对练天数</div>
+            </div>
+            <div class="stat-card-large" style="background: linear-gradient(135deg, #AD86AE 0%, #ECD9ED 100%);">
+                <div class="stat-icon">📊</div>
+                <span class="stat-number" id="totalNum">0</span>
+                <div class="stat-label">累计对练次数</div>
+            </div>
+            <div class="stat-card-large" style="background: linear-gradient(135deg, #EADACB 0%, #F7E6D5 100%); color: var(--text-dark);">
+                <div class="stat-icon">⭐</div>
+                <span class="stat-number" id="avgNum">0</span>
+                <div class="stat-label">历史平均分</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📈 本周对练趋势</div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🎯 题型掌握度</div>
+            <div class="chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="startPractice()">
+            <span>✏️</span>
+            <span>开始新对练</span>
+        </button>
+    </div>
+
+    <!-- 对练页 -->
+    <div class="page" id="page-practice">
+        <div class="header">
+            <div class="header-title">新对练</div>
+            <div class="header-subtitle">第 <span id="currentQ">1</span> / 4 题</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-dot active" id="dot-1"></div>
+            <div class="progress-dot" id="dot-2"></div>
+            <div class="progress-dot" id="dot-3"></div>
+            <div class="progress-dot" id="dot-4"></div>
+        </div>
+
+        <div class="question-card" id="question-form">
+            <input type="hidden" id="q-num" value="1">
+            
+            <div class="input-group">
+                <label class="input-label">选择题型</label>
+                <div class="type-grid">
+                    <div class="type-option" data-type="综合分析-关键词" onclick="selectType(this)">
+                        <span class="icon-zonghe"></span> 综合分析-关键词
+                    </div>
+                    <div class="type-option" data-type="综合分析-看法题" onclick="selectType(this)">
+                        <span class="icon-zonghe"></span> 综合分析-看法题
+                    </div>
+                    <div class="type-option" data-type="组织管理" onclick="selectType(this)">
+                        <span class="icon-zuzhi"></span> 组织管理
+                    </div>
+                    <div class="type-option" data-type="应急应变" onclick="selectType(this)">
+                        <span class="icon-yingji"></span> 应急应变
+                    </div>
+                    <div class="type-option" data-type="人际关系" onclick="selectType(this)">
+                        <span class="icon-renji"></span> 人际关系
+                    </div>
+                    <div class="type-option" data-type="自我认知" onclick="selectType(this)">
+                        <span class="icon-ziwo"></span> 自我认知
+                    </div>
+                    <div class="type-option" data-type="情景模拟" onclick="selectType(this)">
+                        <span class="icon-qingjing"></span> 情景模拟
+                    </div>
+                    <div class="type-option" data-type="排序题" onclick="selectType(this)">
+                        <span class="icon-paixu"></span> 排序题
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">题目主题</label>
+                <input type="text" class="text-field" id="q-theme" placeholder="如：双减政策、乡村振兴...">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">答题用时</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" class="text-field" id="q-min" placeholder="分" style="flex: 1;" min="0" max="20">
+                    <input type="number" class="text-field" id="q-sec" placeholder="秒" style="flex: 1;" min="0" max="59">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">五维评分</label>
+                <div class="rating-row">
+                    <span class="rating-label">🧠 内容逻辑</span>
+                    <div class="star-rating" data-dim="logic">
+                        <span class="star" onclick="rate(this, 1)">★</span>
+                        <span class="star" onclick="rate(this, 2)">★</span>
+                        <span class="star" onclick="rate(this, 3)">★</span>
+                        <span class="star" onclick="rate(this, 4)">★</span>
+                        <span class="star" onclick="rate(this, 5)">★</span>
+                    </div>
+                </div>
+                <div class="rating-row">
+                    <span class="rating-label">🗣️ 表达流畅</span>
+                    <div class="star-rating" data-dim="fluent">
+                        <span class="star" onclick="rate(this, 1)">★</span>
+                        <span class="star" onclick="rate(this, 2)">★</span>
+                        <span class="star" onclick="rate(this, 3)">★</span>
+                        <span class="star" onclick="rate(this, 4)">★</span>
+                        <span class="star" onclick="rate(this, 5)">★</span>
+                    </div>
+                </div>
+                <div class="rating-row">
+                    <span class="rating-label">⏱️ 时间把控</span>
+                    <div class="star-rating" data-dim="time">
+                        <span class="star" onclick="rate(this, 1)">★</span>
+                        <span class="star" onclick="rate(this, 2)">★</span>
+                        <span class="star" onclick="rate(this, 3)">★</span>
+                        <span class="star" onclick="rate(this, 4)">★</span>
+                        <span class="star" onclick="rate(this, 5)">★</span>
+                    </div>
+                </div>
+                <div class="rating-row">
+                    <span class="rating-label">💪 自信气场</span>
+                    <div class="star-rating" data-dim="confidence">
+                        <span class="star" onclick="rate(this, 1)">★</span>
+                        <span class="star" onclick="rate(this, 2)">★</span>
+                        <span class="star" onclick="rate(this, 3)">★</span>
+                        <span class="star" onclick="rate(this, 4)">★</span>
+                        <span class="star" onclick="rate(this, 5)">★</span>
+                    </div>
+                </div>
+                <div class="rating-row">
+                    <span class="rating-label">✨ 亮点金句</span>
+                    <div class="star-rating" data-dim="highlight">
+                        <span class="star" onclick="rate(this, 1)">★</span>
+                        <span class="star" onclick="rate(this, 2)">★</span>
+                        <span class="star" onclick="rate(this, 3)">★</span>
+                        <span class="star" onclick="rate(this, 4)">★</span>
+                        <span class="star" onclick="rate(this, 5)">★</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">💡 同学反馈</label>
+                <textarea class="text-field" id="q-feedback" rows="3" placeholder="同学指出了什么问题？"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">🎯 改进要点（加入错题本）</label>
+                <textarea class="text-field" id="q-improve" rows="2" placeholder="下次要注意什么？"></textarea>
+            </div>
+
+            <div class="input-group" id="highlight-group" style="display: none;">
+                <label class="input-label">🌟 亮点金句（加入金句本）</label>
+                <textarea class="text-field" id="q-quote" rows="2" placeholder="这次有什么精彩表达？"></textarea>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn-half btn-prev" onclick="prevQ()" id="btn-prev" style="display: none;">上一题</button>
+                <button class="btn-half btn-next" onclick="nextQ()" id="btn-next">下一题</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 金句本 -->
+    <div class="page" id="page-quotes">
+        <div class="header">
+            <div class="header-title">🌟 金句本</div>
+            <div class="header-subtitle">积累的精彩表达</div>
+        </div>
+
+        <div id="quotes-list">
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <div>还没有金句，开始积累吧！</div>
+            </div>
+        </div>
+
+        <button class="add-quote-btn" onclick="showAddQuote()">+</button>
+    </div>
+
+    <!-- 错题本 -->
+    <div class="page" id="page-todos">
+        <div class="header">
+            <div class="header-title">📋 错题本</div>
+            <div class="header-subtitle">待改进清单</div>
+        </div>
+
+        <div id="todos-list">
+            <div class="empty-state">
+                <div class="empty-icon">✅</div>
+                <div>没有待改进项，继续保持！</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史 -->
+    <div class="page" id="page-history">
+        <div class="header">
+            <div class="header-title">📚 历史记录</div>
+            <div class="header-subtitle">过往对练回顾</div>
+        </div>
+
+        <div class="tool-bar">
+            <div class="tool-btn" onclick="showTimer()">
+                <div class="tool-icon">⏱️</div>
+                <div class="tool-label">计时器</div>
+            </div>
+            <div class="tool-btn" onclick="showDrawer()">
+                <div class="tool-icon">🎲</div>
+                <div class="tool-label">抽题器</div>
+            </div>
+        </div>
+
+        <div id="history-list">
+            <div class="empty-state">
+                <div class="empty-icon">📖</div>
+                <div>还没有对练记录</div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="exportData()" style="margin-top: 20px;">
+            💾 导出数据备份
+        </button>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchPage('home')">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('practice')">
+            <span class="nav-icon">✏️</span>
+            <span>对练</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('quotes')">
+            <span class="nav-icon">🌟</span>
+            <span>金句</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('todos')">
+            <span class="nav-icon">📋</span>
+            <span>错题</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('history')">
+            <span class="nav-icon">📚</span>
+            <span>历史</span>
+        </button>
+    </div>
+
+    <!-- 计时器弹窗 -->
+    <div class="modal" id="timer-modal">
+        <div class="modal-content">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">⏱️ 面试计时器</h2>
+            <div class="timer-display" id="timer-display">20:00</div>
+            <div style="color: var(--text-light); margin-bottom: 20px;">
+                建议时间：4题 × 5分钟
+            </div>
+            <div class="timer-controls">
+                <button class="timer-btn timer-start" onclick="startTimer()" id="timer-start">开始</button>
+                <button class="timer-btn timer-pause" onclick="pauseTimer()" id="timer-pause" style="display: none;">暂停</button>
+                <button class="timer-btn timer-reset" onclick="resetTimer()">重置</button>
+            </div>
+            <button onclick="closeModal('timer-modal')" style="margin-top: 20px; background: none; border: none; color: var(--text-light); cursor: pointer;">关闭</button>
+        </div>
+    </div>
+
+    <!-- 抽题器弹窗 -->
+    <div class="modal" id="drawer-modal">
+        <div class="modal-content">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">🎲 随机抽题</h2>
+            <div class="draw-result" id="draw-result" style="display: none;">
+                <div class="draw-type" id="draw-type"></div>
+                <div class="draw-theme" id="draw-theme"></div>
+            </div>
+            <button class="btn-primary" onclick="drawQuestion()" style="margin: 20px 0;">
+                🎲 抽一题
+            </button>
+            <button onclick="closeModal('drawer-modal')" style="background: none; border: none; color: var(--text-light); cursor: pointer;">关闭</button>
+        </div>
+    </div>
+
+    <!-- 添加金句弹窗 -->
+    <div class="modal" id="add-quote-modal">
+        <div class="modal-content" style="text-align: left;">
+            <h2 style="color: var(--primary); margin-bottom: 20px; text-align: center;">🌟 添加金句</h2>
+            <div class="input-group">
+                <label class="input-label">主题</label>
+                <input type="text" class="text-field" id="new-quote-theme" placeholder="如：乡村振兴">
+            </div>
+            <div class="input-group">
+                <label class="input-label">金句内容</label>
+                <textarea class="text-field" id="new-quote-content" rows="4" placeholder="输入精彩表达..."></textarea>
+            </div>
+            <div class="input-group">
+                <label class="input-label">适用题型</label>
+                <select class="text-field" id="new-quote-type">
+                    <option value="综合分析">综合分析</option>
+                    <option value="组织管理">组织管理</option>
+                    <option value="应急应变">应急应变</option>
+                    <option value="人际关系">人际关系</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="addQuote()" style="margin-top: 10px;">保存</button>
+            <button onclick="closeModal('add-quote-modal')" style="display: block; width: 100%; margin-top: 10px; background: none; border: none; color: var(--text-light); cursor: pointer;">取消</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'interviewData_v2';
+        let currentData = {
+            sessions: [],
+            quotes: [],
+            currentPractice: null
+        };
+        let currentQ = 1;
+        let ratings = {};
+        let timerInterval = null;
+        let timerSeconds = 1200; // 20分钟
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            updateHome();
+            renderQuotes();
+            renderTodos();
+            renderHistory();
+        });
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                currentData = JSON.parse(saved);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData));
+        }
+
+        // 页面切换
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(`page-${page}`).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            if (page === 'home') updateHome();
+            if (page === 'quotes') renderQuotes();
+            if (page === 'todos') renderTodos();
+            if (page === 'history') renderHistory();
+        }
+
+        // 首页数据
+        function updateHome() {
+            const sessions = currentData.sessions;
+            
+            // 连续天数
+            const dates = [...new Set(sessions.map(s => s.date))];
+            let streak = 0;
+            const today = new Date().toISOString().split('T')[0];
+            let checkDate = new Date();
+            if (!dates.includes(today)) {
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+            while (dates.includes(checkDate.toISOString().split('T')[0])) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+            document.getElementById('streakNum').textContent = streak;
+            
+            // 累计次数
+            document.getElementById('totalNum').textContent = sessions.length;
+            
+            // 平均分
+            const allScores = sessions.flatMap(s => s.questions.map(q => q.avgScore));
+            const avg = allScores.length ? (allScores.reduce((a,b) => a+b, 0) / allScores.length).toFixed(1) : 0;
+            document.getElementById('avgNum').textContent = avg;
+            
+            // 趋势图
+            updateTrendChart(sessions);
+            // 雷达图
+            updateRadarChart(sessions);
+        }
+
+        function updateTrendChart(sessions) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            const last7 = sessions.slice(0, 7).reverse();
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last7.map(s => s.date.slice(5)),
+                    datasets: [{
+                        label: '平均分',
+                        data: last7.map(s => s.sessionAvg),
+                        borderColor: '#746097',
+                        backgroundColor: 'rgba(116, 96, 151, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 5 }
+                    }
+                }
+            });
+        }
+
+        function updateRadarChart(sessions) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const typeScores = {};
+            const typeCounts = {};
+            
+            sessions.forEach(s => {
+                s.questions.forEach(q => {
+                    if (!typeScores[q.type]) {
+                        typeScores[q.type] = 0;
+                        typeCounts[q.type] = 0;
+                    }
+                    typeScores[q.type] += q.avgScore;
+                    typeCounts[q.type]++;
+                });
+            });
+            
+            const labels = Object.keys(typeScores);
+            const data = labels.map(t => (typeScores[t] / typeCounts[t]).toFixed(1));
+            
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: 'rgba(116, 96, 151, 0.2)',
+                        borderColor: '#746097',
+                        pointBackgroundColor: '#746097'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: { beginAtZero: true, max: 5 }
+                    }
+                }
+            });
+        }
+
+        // 对练流程
+        function startPractice() {
+            currentData.currentPractice = {
+                date: new Date().toISOString().split('T')[0],
+                questions: []
+            };
+            currentQ = 1;
+            ratings = {};
+            resetForm();
+            switchPage('practice');
+            document.querySelector('.nav-item:nth-child(2)').classList.add('active');
+        }
+
+        function resetForm() {
+            document.querySelectorAll('.type-option').forEach(t => t.classList.remove('selected'));
+            document.getElementById('q-theme').value = '';
+            document.getElementById('q-min').value = '';
+            document.getElementById('q-sec').value = '';
+            document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+            document.getElementById('q-feedback').value = '';
+            document.getElementById('q-improve').value = '';
+            document.getElementById('q-quote').value = '';
+            ratings = {};
+            updateProgress();
+        }
+
+        function selectType(el) {
+            document.querySelectorAll('.type-option').forEach(t => t.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function rate(el, val) {
+            const container = el.parentElement;
+            container.querySelectorAll('.star').forEach((s, i) => {
+                if (i < val) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+            ratings[container.dataset.dim] = val;
+            
+            // 高分显示金句输入
+            const avg = Object.values(ratings).reduce((a,b) => a+b, 0) / Object.values(ratings).length;
+            document.getElementById('highlight-group').style.display = avg >= 4 ? 'block' : 'none';
+        }
+
+        function updateProgress() {
+            document.getElementById('currentQ').textContent = currentQ;
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`dot-${i}`).classList.toggle('active', i <= currentQ);
+            }
+            document.getElementById('btn-prev').style.display = currentQ === 1 ? 'none' : 'block';
+            document.getElementById('btn-next').textContent = currentQ === 4 ? '完成' : '下一题';
+        }
+
+        function nextQ() {
+            // 保存当前题
+            const type = document.querySelector('.type-option.selected')?.dataset.type;
+            if (!type) {
+                alert('请选择题型');
+                return;
+            }
+            if (Object.keys(ratings).length < 5) {
+                alert('请完成所有维度评分');
+                return;
+            }
+            
+            const qData = {
+                num: currentQ,
+                type,
+                theme: document.getElementById('q-theme').value || '未记录',
+                time: `${document.getElementById('q-min').value || 0}分${document.getElementById('q-sec').value || 0}秒`,
+                ratings: {...ratings},
+                avgScore: (Object.values(ratings).reduce((a,b) => a+b, 0) / 5).toFixed(1),
+                feedback: document.getElementById('q-feedback').value,
+                improve: document.getElementById('q-improve').value
+            };
+            
+            currentData.currentPractice.questions.push(qData);
+            
+            // 保存金句
+            const quote = document.getElementById('q-quote').value;
+            if (quote) {
+                currentData.quotes.push({
+                    content: quote,
+                    theme: qData.theme,
+                    type: qData.type,
+                    date: currentData.currentPractice.date
+                });
+            }
+            
+            if (currentQ < 4) {
+                currentQ++;
+                resetForm();
+                updateProgress();
+            } else {
+                // 完成
+                currentData.currentPractice.sessionAvg = 
+                    (currentData.currentPractice.questions.reduce((a,q) => a + parseFloat(q.avgScore), 0) / 4).toFixed(1);
+                currentData.sessions.unshift(currentData.currentPractice);
+                saveData();
+                alert('对练完成！');
+                switchPage('home');
+                document.querySelector('.nav-item').classList.add('active');
+            }
+        }
+
+        function prevQ() {
+            if (currentQ > 1) {
+                currentQ--;
+                currentData.currentPractice.questions.pop();
+                resetForm();
+                updateProgress();
+            }
+        }
+
+        // 金句本
+        function renderQuotes() {
+            const list = document.getElementById('quotes-list');
+            if (currentData.quotes.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div>还没有金句，开始积累吧！</div></div>';
+                return;
+            }
+            
+            list.innerHTML = currentData.quotes.map(q => `
+                <div class="quote-card">
+                    <div class="quote-header">
+                        <span class="quote-theme">${q.theme}</span>
+                        <span class="quote-date">${q.date}</span>
+                    </div>
+                    <div class="quote-content">"${q.content}"</div>
+                    <div class="quote-type">适用：${q.type}</div>
+                </div>
+            `).join('');
+        }
+
+        function showAddQuote() {
+            document.getElementById('add-quote-modal').classList.add('active');
+        }
+
+        function addQuote() {
+            const theme = document.getElementById('new-quote-theme').value;
+            const content = document.getElementById('new-quote-content').value;
+            const type = document.getElementById('new-quote-type').value;
+            
+            if (!content) {
+                alert('请输入金句内容');
+                return;
+            }
+            
+            currentData.quotes.push({
+                theme: theme || '未分类',
+                content,
+                type,
+                date: new Date().toISOString().split('T')[0]
+            });
+            saveData();
+            renderQuotes();
+            closeModal('add-quote-modal');
+            
+            // 清空
+            document.getElementById('new-quote-theme').value = '';
+            document.getElementById('new-quote-content').value = '';
+        }
+
+        // 错题本
+        function renderTodos() {
+            const list = document.getElementById('todos-list');
+            const todos = [];
+            
+            currentData.sessions.forEach(s => {
+                s.questions.forEach(q => {
+                    if (q.improve) {
+                        todos.push({
+                            content: q.improve,
+                            type: q.type,
+                            theme: q.theme,
+                            date: s.date,
+                            score: q.avgScore
+                        });
+                    }
+                });
+            });
+            
+            if (todos.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><div>没有待改进项，继续保持！</div></div>';
+                return;
+            }
+            
+            // 按分数排序（低的在前）
+            todos.sort((a, b) => a.score - b.score);
+            
+            list.innerHTML = todos.map(t => `
+                <div class="todo-card" onclick="this.classList.toggle('completed'); this.querySelector('.todo-checkbox').classList.toggle('checked')">
+                    <div class="todo-checkbox"></div>
+                    <div class="todo-content">
+                        <div class="todo-title">${t.content}</div>
+                        <div class="todo-meta">${t.type} · ${t.theme} · ${t.date} · ${t.score}分</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 历史
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            if (currentData.sessions.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div><div>还没有对练记录</div></div>';
+                return;
+            }
+            
+            list.innerHTML = currentData.sessions.slice(0, 10).map(s => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-date">${s.date}</span>
+                        <span class="history-score">${s.sessionAvg}分</span>
+                    </div>
+                    <div class="history-questions">
+                        ${s.questions.map(q => `
+                            <div class="hq-item">
+                                <span class="hq-type">${getIcon(q.type)} ${q.type}</span>
+                                <span class="hq-score">${q.avgScore}分</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getIcon(type) {
+            const map = {
+                '综合分析-关键词': '💡',
+                '综合分析-看法题': '💡',
+                '组织管理': '📋',
+                '应急应变': '🔥',
+                '人际关系': '🤝',
+                '自我认知': '👤',
+                '情景模拟': '🎭',
+                '排序题': '📊'
+            };
+            return map[type] || '📝';
+        }
+
+        // 工具
+        function showTimer() {
+            document.getElementById('timer-modal').classList.add('active');
+        }
+
+        function startTimer() {
+            document.getElementById('timer-start').style.display = 'none';
+            document.getElementById('timer-pause').style.display = 'block';
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                if (timerSeconds <= 0) {
+                    pauseTimer();
+                    alert('时间到！');
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-start').style.display = 'block';
+            document.getElementById('timer-pause').style.display = 'none';
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerSeconds = 1200;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const s = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').textContent = `${m}:${s}`;
+            document.getElementById('timer-display').style.color = timerSeconds < 60 ? '#FC8181' : '#746097';
+        }
+
+        function showDrawer() {
+            document.getElementById('drawer-modal').classList.add('active');
+            document.getElementById('draw-result').style.display = 'none';
+        }
+
+        function drawQuestion() {
+            const types = Object.keys({
+                '综合分析-关键词': 1, '综合分析-看法题': 1, '组织管理': 1,
+                '应急应变': 1, '人际关系': 1, '自我认知': 1, '情景模拟': 1, '排序题': 1
+            });
+            const themes = ['双减政策', '乡村振兴', '数字化改革', '基层治理', '疫情防控', '营商环境', '共同富裕', '生态文明', '文化自信', '科技创新'];
+            
+            const type = types[Math.floor(Math.random() * types.length)];
+            const theme = themes[Math.floor(Math.random() * themes.length)];
+            
+            document.getElementById('draw-type').textContent = type;
+            document.getElementById('draw-theme').textContent = `主题建议：${theme}`;
+            document.getElementById('draw-result').style.display = 'block';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function exportData() {
+            const data = JSON.stringify(currentData, null, 2);
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `面试对练数据_${new Date().toLocaleDateString()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 点击外部关闭弹窗
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', (e) => {
+                if (e.target === m) m.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
